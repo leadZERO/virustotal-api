@@ -3,6 +3,13 @@
 Release History
 ---------------
 
+1.1.3 (2017-02-3)
+------------------
+
+**Request Timeout Functionality**
+
+- Adds a timeout parameter to methods that make requests to the VirusTotal API (credit: @mrredamber)
+
 1.1.2 (2016-04-13)
 ------------------
 

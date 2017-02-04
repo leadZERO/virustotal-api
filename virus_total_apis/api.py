@@ -59,7 +59,7 @@ class PublicApi():
         if api_key is None:
             raise ApiError("You must supply a valid VirusTotal API key.")
 
-    def scan_file(self, this_file, from_disk=True, filename=None):
+    def scan_file(self, this_file, from_disk=True, filename=None, timeout=None):
         """ Submit a file to be scanned by VirusTotal.
 
         The VirusTotal API allows you to send files. Before performing your submissions we encourage you to retrieve
@@ -71,6 +71,8 @@ class PublicApi():
         :param from_disk: If True we read the file contents from disk using this_file as filepath. If False this_file
                           is the actual file object.
         :param filename: Specify the filename, this overwrites the filename if we read a file from disk.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response that contains scan_id and permalink.
         """
         params = {'apikey': self.api_key}
@@ -85,30 +87,36 @@ class PublicApi():
                 files = {'file': this_file}
 
         try:
-            response = requests.post(self.base + 'file/scan', files=files, params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'file/scan',
+                                     files=files,
+                                     params=params,
+                                     proxies=self.proxies,
+                                     timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def rescan_file(self, this_hash):
+    def rescan_file(self, this_hash, timeout=None):
         """ Rescan a previously submitted filed or schedule an scan to be performed in the future.
 
         :param this_hash: a md5/sha1/sha256 hash. You can also specify a CSV list made up of a combination of any of
                           the three allowed hashes (up to 25 items), this allows you to perform a batch request with
                           one single call. Note that the file must already be present in our file store.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response that contains scan_id and permalink.
         """
         params = {'apikey': self.api_key, 'resource': this_hash}
 
         try:
-            response = requests.post(self.base + 'file/rescan', params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'file/rescan', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_file_report(self, this_hash):
+    def get_file_report(self, this_hash, timeout=None):
         """ Get the scan results for a file.
 
         You can also specify a CSV list made up of a combination of hashes and scan_ids
@@ -118,35 +126,39 @@ class PublicApi():
 
         :param this_hash: The md5/sha1/sha256/scan_ids hash of the file whose dynamic behavioural report you want to
                             retrieve or scan_ids from a previous call to scan_file.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return:
         """
         params = {'apikey': self.api_key, 'resource': this_hash}
 
         try:
-            response = requests.get(self.base + 'file/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def scan_url(self, this_url):
+    def scan_url(self, this_url, timeout=None):
         """ Submit a URL to be scanned by VirusTotal.
 
         :param this_url: The URL that should be scanned. This parameter accepts a list of URLs (up to 4 with the
                          standard request rate) so as to perform a batch scanning request with one single call. The
                          URLs must be separated by a new line character.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response that contains scan_id and permalink.
         """
         params = {'apikey': self.api_key, 'url': this_url}
 
         try:
-            response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies, timeout=None)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_url_report(self, this_url, scan='0'):
+    def get_url_report(self, this_url, scan='0', timeout=None):
         """ Get the scan results for a URL. (can do batch searches like get_file_report)
 
         :param this_url: a URL will retrieve the most recent report on the given URL. You may also specify a scan_id
@@ -158,18 +170,20 @@ class PublicApi():
         :param scan: (optional): this is an optional parameter that when set to "1" will automatically submit the URL
                       for analysis if no report is found for it in VirusTotal's database. In this case the result will
                       contain a scan_id field that can be used to query the analysis report later on.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
         params = {'apikey': self.api_key, 'resource': this_url, 'scan': scan}
 
         try:
-            response = requests.get(self.base + 'url/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'url/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def put_comments(self, resource, comment):
+    def put_comments(self, resource, comment, timeout=None):
         """ Post a comment on a file or URL.
 
         The initial idea of VirusTotal Community was that users should be able to make comments on files and URLs,
@@ -183,43 +197,52 @@ class PublicApi():
                          to comment on.
         :param comment: the actual review, you can tag it using the "#" twitter-like syntax (e.g. #disinfection #zbot)
                         and reference users using the "@" syntax (e.g. @VirusTotalTeam).
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: If the comment was successfully posted the response code will be 1, 0 otherwise.
         """
         params = {'apikey': self.api_key, 'resource': resource, 'comment': comment}
 
         try:
-            response = requests.post(self.base + 'comments/put', params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'comments/put', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_ip_report(self, this_ip):
+    def get_ip_report(self, this_ip, timeout=None):
         """ Get IP address reports.
 
         :param this_ip: a valid IPv4 address in dotted quad notation, for the time being only IPv4 addresses are
                         supported.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
         params = {'apikey': self.api_key, 'ip': this_ip}
 
         try:
-            response = requests.get(self.base + 'ip-address/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'ip-address/report',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_domain_report(self, this_domain):
+    def get_domain_report(self, this_domain, timeout=None):
         """ Get information about a given domain.
 
         :param this_domain: a domain name.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
         params = {'apikey': self.api_key, 'domain': this_domain}
 
         try:
-            response = requests.get(self.base + 'domain/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'domain/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -228,7 +251,13 @@ class PublicApi():
 
 class PrivateApi(PublicApi):
 
-    def scan_file(self, this_file, notify_url=None, notify_changes_only=None, from_disk=True, filename=None):
+    def scan_file(self,
+                  this_file,
+                  notify_url=None,
+                  notify_changes_only=None,
+                  from_disk=True,
+                  filename=None,
+                  timeout=None):
         """ Submit a file to be scanned by VirusTotal.
 
         Allows you to send a file for scanning with VirusTotal. Before performing your submissions we encourage you to
@@ -243,6 +272,8 @@ class PrivateApi(PublicApi):
         :param from_disk: If True we read the file contents from disk using this_file as filepath. If False this_file
                           is the actual file object.
         :param filename: Specify the filename, this overwrites the filename if we read a file from disk.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response that contains scan_id and permalink.
         """
         params = {'apikey': self.api_key}
@@ -257,25 +288,34 @@ class PrivateApi(PublicApi):
                 files = {'file': this_file}
 
         try:
-            response = requests.post(self.base + 'file/scan', files=files, params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'file/scan',
+                                     files=files,
+                                     params=params,
+                                     proxies=self.proxies,
+                                     timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
     @property
-    def get_upload_url(self):
+    def get_upload_url(self, timeout=None):
         """ Get a special URL for submitted files bigger than 32MB.
 
         In order to submit files bigger than 32MB you need to obtain a special upload URL to which you
         can POST files up to 200MB in size. This API generates such a URL.
+
+        :param timeout: The amount of time in seconds the request should wait before timing out.
 
         :return: JSON special upload URL to which you can POST files up to 200MB in size.
         """
         params = {'apikey': self.api_key}
 
         try:
-            response = requests.get(self.base + 'file/scan/upload_url', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/scan/upload_url',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -284,7 +324,7 @@ class PrivateApi(PublicApi):
         else:
             return dict(response_code=response.status_code)
 
-    def rescan_file(self, resource, date='', period='', repeat='', notify_url='', notify_changes_only=''):
+    def rescan_file(self, resource, date='', period='', repeat='', notify_url='', notify_changes_only='', timeout=None):
         """ Rescan a previously submitted filed or schedule an scan to be performed in the future.
 
         This API allows you to rescan files present in VirusTotal's file store without having to
@@ -306,18 +346,20 @@ class PrivateApi(PublicApi):
         :param notify_url: (optional) A URL to which a POST notification should be sent when the rescan finishes.
         :param notify_changes_only: (optional) Used in conjunction with notify_url. Indicates if POST notifications
         should only be sent if the scan results differ from the previous one.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response that contains scan_id and permalink.
         """
         params = {'apikey': self.api_key, 'resource': resource}
 
         try:
-            response = requests.post(self.base + 'file/rescan', params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'file/rescan', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def cancel_rescan_file(self, resource):
+    def cancel_rescan_file(self, resource, timeout=None):
         """ Delete a previously scheduled scan.
 
         Deletes a scheduled file rescan task. The file rescan api allows you to schedule periodic scans of a file,
@@ -325,19 +367,21 @@ class PrivateApi(PublicApi):
         scanning.
 
         :param resource: The md5/sha1/sha256 hash of the file whose dynamic behavioural report you want to retrieve.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON acknowledgement. In the event that the scheduled scan deletion fails for whatever reason, the
         response code will be -1.
         """
         params = {'apikey': self.api_key, 'resource': resource}
 
         try:
-            response = requests.post(self.base + 'rescan/delete', params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'rescan/delete', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_file_report(self, resource, allinfo=1):
+    def get_file_report(self, resource, allinfo=1, timeout=None):
         """ Get the scan results for a file.
 
         Retrieves a concluded file scan report for a given file. Unlike the public API, this call allows you to also
@@ -353,19 +397,20 @@ class PrivateApi(PublicApi):
         on the file (PDFiD, ExifTool, sigcheck, TrID, etc.), metadata regarding VirusTotal submissions (number of
         unique sources that have sent the file in the past, first seen date, last seen date, etc.), the output of
         in-house technologies such as a behavioural sandbox, etc.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
 
         :return: JSON response
         """
         params = {'apikey': self.api_key, 'resource': resource, 'allinfo': allinfo}
 
         try:
-            response = requests.get(self.base + 'file/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_file_behaviour(self, this_hash):
+    def get_file_behaviour(self, this_hash, timeout=None):
         """ Get a report about the behaviour of the file in sand boxed environment.
 
         VirusTotal runs a distributed setup of Cuckoo sandbox machines that execute the files we receive. Execution is
@@ -378,18 +423,20 @@ class PrivateApi(PublicApi):
         behaviour-v1 property of the additional_info field in the JSON report.
 
         :param this_hash: The md5/sha1/sha256 hash of the file whose dynamic behavioural report you want to retrieve.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: full JSON report of the file's execution as returned by the Cuckoo JSON report encoder.
         """
         params = {'apikey': self.api_key, 'hash': this_hash}
 
         try:
-            response = requests.get(self.base + 'file/behaviour', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/behaviour', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_network_traffic(self, this_hash):
+    def get_network_traffic(self, this_hash, timeout=None):
         """ Get a dump of the network traffic generated by the file.
 
         VirusTotal runs a distributed setup of Cuckoo sandbox machines that execute the files we receive.
@@ -407,7 +454,10 @@ class PrivateApi(PublicApi):
         params = {'apikey': self.api_key, 'hash': this_hash}
 
         try:
-            response = requests.get(self.base + 'file/network-traffic', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/network-traffic',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -416,7 +466,7 @@ class PrivateApi(PublicApi):
         except ValueError:
             return response.content
 
-    def file_search(self, query, offset=None):
+    def file_search(self, query, offset=None, timeout=None):
         """ Search for samples.
 
         In addition to retrieving all information on a particular file, VirusTotal allows you to perform what we
@@ -444,19 +494,21 @@ class PrivateApi(PublicApi):
         :param offset: (optional) The offset value returned by a previously issued identical query, allows you to
         paginate over the results. If not specified the first 300 matching files sorted according to last submission
         date to VirusTotal in a descending fashion will be returned.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response -  By default the list returned contains at most 300 hashes, ordered according to
         last submission date to VirusTotal in a descending fashion.
         """
         params = dict(apikey=self.api_key, query=query, offset=offset)
 
         try:
-            response = requests.get(self.base + 'file/search', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/search', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_file_clusters(self, this_date):
+    def get_file_clusters(self, this_date, timeout=None):
         """ File similarity clusters for a given time frame.
 
         VirusTotal has built its own in-house file similarity clustering functionality. At present, this clustering
@@ -472,6 +524,8 @@ class PrivateApi(PublicApi):
         VirusTotal Intelligence in order to be able to view the clustering listing.
 
         :param this_date: A specific day for which we want to access the clustering details, example: 2013-09-10.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON object contains several properties
         num_candidates - Total number of files submitted during the given time frame for which a feature hash could
                          be calculated.
@@ -489,13 +543,13 @@ class PrivateApi(PublicApi):
         params = {'apikey': self.api_key, 'date': this_date}
 
         try:
-            response = requests.get(self.base + 'file/clusters', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/clusters', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_file_distribution(self, before='', after='', reports='false', limit='1000'):
+    def get_file_distribution(self, before='', after='', reports='false', limit='1000', timeout=None):
         """ Get a live feed with the latest files submitted to VirusTotal.
 
         Allows you to retrieve a live feed of absolutely all uploaded files to VirusTotal, and download them for
@@ -507,18 +561,23 @@ class PrivateApi(PublicApi):
         :param reports: (optional) Include the files' antivirus results in the response. Possible values are 'true' or
         'false' (default value is 'false').
         :param limit: (optional) Retrieve limit file items at most (default: 1000).
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response: please see https://www.virustotal.com/en/documentation/private-api/#file-distribution
         """
         params = {'apikey': self.api_key, 'before': before, 'after': after, 'reports': reports, 'limit': limit}
 
         try:
-            response = requests.get(self.base + 'file/distribution', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/distribution',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_file_feed(self, package=None):
+    def get_file_feed(self, package=None, timeout=None):
         """ Get a live file feed with the latest files submitted to VirusTotal.
 
         Allows you to retrieve a live feed of absolutely all uploaded files to VirusTotal, and download them for
@@ -534,6 +593,8 @@ class PrivateApi(PublicApi):
         :param package: Indicates a time window to pull reports on all items received during such window.
                         Only per-minute and hourly windows are allowed, the format is %Y%m%dT%H%M (e.g. 20160304T0900)
                         or %Y%m%dT%H (e.g. 20160304T09). Time is expressed in UTC.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: BZIP2 response: please see https://www.virustotal.com/en/documentation/private-api/#file-feed
         """
         if package is None:
@@ -546,7 +607,7 @@ class PrivateApi(PublicApi):
         params = {'apikey': self.api_key, 'package': package}
 
         try:
-            response = requests.get(self.base + 'file/feed', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/feed', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -563,19 +624,21 @@ class PrivateApi(PublicApi):
         else:
             return dict(response_code=response.status_code)
 
-    def get_file(self, this_hash):
+    def get_file(self, this_hash, timeout=None):
         """ Download a file by its hash.
 
         Downloads a file from VirusTotal's store given one of its hashes. This call can be used in conjuction with
         the file searching call in order to download samples that match a given set of criteria.
 
         :param this_hash: The md5/sha1/sha256 hash of the file you want to download.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: Downloaded file in response.content
         """
         params = {'apikey': self.api_key, 'hash': this_hash}
 
         try:
-            response = requests.get(self.base + 'file/download', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'file/download', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -589,7 +652,7 @@ class PrivateApi(PublicApi):
         else:
             return dict(response_code=response.status_code)
 
-    def scan_url(self, this_url):
+    def scan_url(self, this_url, timeout=None):
         """ Submit a URL to be scanned by VirusTotal.
 
         Allows you to submit URLs to be scanned by VirusTotal. Before performing your submission we encourage you to
@@ -599,18 +662,20 @@ class PrivateApi(PublicApi):
         :param this_url: The URL that should be scanned. This parameter accepts a list of URLs so as to perform a batch
         scanning request with just one single call (up to 25 URLs per call). The URLs must be separated by a new line
         character.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response that contains scan_id and permalink.
         """
         params = {'apikey': self.api_key, 'url': this_url}
 
         try:
-            response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_url_report(self, this_url, scan='0', allinfo=1):
+    def get_url_report(self, this_url, scan='0', allinfo=1, timeout=None):
         """ Get the scan results for a URL.
 
         :param this_url: A URL for which you want to retrieve the most recent report. You may also specify a scan_id
@@ -624,19 +689,21 @@ class PrivateApi(PublicApi):
         (other than the URL scanning engine results) will also be returned. This additional info includes VirusTotal
         related metadata (first seen date, last seen date, files downloaded from the given URL, etc.) and the output
         of other tools and datasets when fed with the URL.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
 
         params = {'apikey': self.api_key, 'resource': this_url, 'scan': scan, 'allinfo': allinfo}
 
         try:
-            response = requests.get(self.base + 'url/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'url/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_url_distribution(self, after=None, reports='true', limit=1000):
+    def get_url_distribution(self, after=None, reports='true', limit=1000, timeout=None):
         """ Get a live feed with the lastest URLs submitted to VirusTotal.
 
         Allows you to retrieve a live feed of URLs submitted to VirusTotal, along with their scan reports. This
@@ -647,19 +714,24 @@ class PrivateApi(PublicApi):
         URL scan (in exactly the same format as the URL scan retrieving API). If the parameter is not specified, each
         item returned will only contain the scanned URL and its detection ratio.
         :param limit: (optional) Retrieve limit file items at most (default: 1000).
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
 
         params = {'apikey': self.api_key, 'after': after, 'reports': reports, 'limit': limit}
 
         try:
-            response = requests.get(self.base + 'url/distribution', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'url/distribution',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_url_feed(self, package=None):
+    def get_url_feed(self, package=None, timeout=None):
         """ Get a live file feed with the latest files submitted to VirusTotal.
 
         Allows you to retrieve a live feed of reports on absolutely all URLs scanned by VirusTotal. This API requires
@@ -675,6 +747,8 @@ class PrivateApi(PublicApi):
         :param package: Indicates a time window to pull reports on all items received during such window.
                         Only per-minute and hourly windows are allowed, the format is %Y%m%dT%H%M (e.g. 20160304T0900)
                         or %Y%m%dT%H (e.g. 20160304T09). Time is expressed in UTC.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: BZIP2 response: please see https://www.virustotal.com/en/documentation/private-api/#file-feed
         """
         if package is None:
@@ -687,7 +761,7 @@ class PrivateApi(PublicApi):
         params = {'apikey': self.api_key, 'package': package}
 
         try:
-            response = requests.get(self.base + 'url/feed', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'url/feed', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -704,7 +778,7 @@ class PrivateApi(PublicApi):
         else:
             return dict(response_code=response.status_code)
 
-    def get_ip_report(self, this_ip):
+    def get_ip_report(self, this_ip, timeout=None):
         """ Get information about a given IP address.
 
         Retrieves a report on a given IP address (including the information recorded by VirusTotal's Passive DNS
@@ -712,36 +786,43 @@ class PrivateApi(PublicApi):
 
         :param this_ip: A valid IPv4 address in dotted quad notation, for the time being only IPv4 addresses are
         supported.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
         params = {'apikey': self.api_key, 'ip': this_ip}
 
         try:
-            response = requests.get(self.base + 'ip-address/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'ip-address/report',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_domain_report(self, this_domain):
+    def get_domain_report(self, this_domain, timeout=None):
         """ Get information about a given domain.
 
         Retrieves a report on a given domain (including the information recorded by VirusTotal's passive DNS
         infrastructure).
 
         :param this_domain: A domain name.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
         params = {'apikey': self.api_key, 'domain': this_domain}
 
         try:
-            response = requests.get(self.base + 'domain/report', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'domain/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def put_comments(self, resource, comment):
+    def put_comments(self, resource, comment, timeout=None):
         """ Post a comment on a file or URL.
 
         Allows you to place comments on URLs and files, these comments will be publicly visible in VirusTotal
@@ -755,18 +836,20 @@ class PrivateApi(PublicApi):
         to comment on.
         :param comment: The actual review, you can tag it using the "#" twitter-like syntax (e.g. #disinfection #zbot)
         and reference users using the "@" syntax (e.g. @VirusTotalTeam).
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response
         """
         params = {'apikey': self.api_key, 'resource': resource, 'comment': comment}
 
         try:
-            response = requests.post(self.base + 'comments/put', params=params, proxies=self.proxies)
+            response = requests.post(self.base + 'comments/put', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return _return_response_and_status_code(response)
 
-    def get_comments(self, resource, before=None):
+    def get_comments(self, resource, before=None, timeout=None):
         """ Get comments for a file or URL.
 
         Retrieve a list of VirusTotal Community comments for a given file or URL. VirusTotal Community comments are
@@ -776,13 +859,15 @@ class PrivateApi(PublicApi):
         :param resource: Either an md5/sha1/sha256 hash of the file or the URL itself you want to retrieve.
         :param before: (optional) A datetime token that allows you to iterate over all comments on a specific item
         whenever it has been commented on more than 25 times.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         :return: JSON response - The application answers with the comments sorted in descending order according to
         their date.
         """
         params = dict(apikey=self.api_key, resource=resource, before=before)
 
         try:
-            response = requests.get(self.base + 'comments/get', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'comments/get', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -800,7 +885,7 @@ class IntelApi():
         self.proxies = proxies
         self.base = 'https://www.virustotal.com/intelligence/'
 
-    def get_hashes_from_search(self, query, page=None):
+    def get_hashes_from_search(self, query, page=None, timeout=None):
         """ Get the scan results for a file.
 
         Even if you do not have a Private Mass API key that you can use, you can still automate VirusTotal Intelligence
@@ -811,18 +896,23 @@ class IntelApi():
         :param page: the next_page property of the results of a previously issued query to this API. This parameter
             should not be provided if it is the very first query to the API, i.e. if we are retrieving the
             first page of results.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         apikey: the API key associated to a VirusTotal Community account with VirusTotal Intelligence privileges.
         """
         params = {'query': query, 'apikey': self.api_key, 'page': page}
 
         try:
-            response = requests.get(self.base + 'search/programmatic/', params=params, proxies=self.proxies)
+            response = requests.get(self.base + 'search/programmatic/',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
         return response.json()['next_page'], response
 
-    def get_file(self, file_hash, save_file_at):
+    def get_file(self, file_hash, save_file_at, timeout=None):
         """ Get the scan results for a file.
 
         Even if you do not have a Private Mass API key that you can use, you can still download files from the
@@ -831,11 +921,17 @@ class IntelApi():
 
         :param file_hash: You may use either the md5, sha1 or sha256 hash of the file in order to download it.
         :param save_file_at: Path of where to save the file.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+
         """
         params = {'hash': file_hash, 'apikey': self.api_key}
 
         try:
-            response = requests.get(self.base + 'download/', params=params, proxies=self.proxies, stream=True)
+            response = requests.get(self.base + 'download/',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    stream=True,
+                                    timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
