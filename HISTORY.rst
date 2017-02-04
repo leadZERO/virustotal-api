@@ -8,7 +8,7 @@ Release History
 
 **Request Timeout Functionality**
 
-- Adds a timeout parameter to methods that make requests to the VirusTotal API (credit: @mrredamber)
+- Adds a timeout parameter to methods that make requests to the VirusTotal API (credit: @mrredamber aka LEGEND)
 
 1.1.2 (2016-04-13)
 ------------------
