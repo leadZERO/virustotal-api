@@ -152,7 +152,7 @@ class PublicApi():
         params = {'apikey': self.api_key, 'url': this_url}
 
         try:
-            response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies, timeout=None)
+            response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -449,6 +449,8 @@ class PrivateApi(PublicApi):
         the network traffic dump generated during the file's execution.
 
         :param this_hash: The md5/sha1/sha256 hash of the file whose network traffic dump you want to retrieve.
+        :param timeout: The amount of time in seconds the request should wait before timing out
+
         :return: Pcap
         """
         params = {'apikey': self.api_key, 'hash': this_hash}
@@ -652,29 +654,6 @@ class PrivateApi(PublicApi):
         else:
             return dict(response_code=response.status_code)
 
-    def scan_url(self, this_url, timeout=None):
-        """ Submit a URL to be scanned by VirusTotal.
-
-        Allows you to submit URLs to be scanned by VirusTotal. Before performing your submission we encourage you to
-        retrieve the latest report on the URL, if it is recent enough you might want to save time and bandwidth by
-        making use of it.
-
-        :param this_url: The URL that should be scanned. This parameter accepts a list of URLs so as to perform a batch
-        scanning request with just one single call (up to 25 URLs per call). The URLs must be separated by a new line
-        character.
-        :param timeout: The amount of time in seconds the request should wait before timing out.
-
-        :return: JSON response that contains scan_id and permalink.
-        """
-        params = {'apikey': self.api_key, 'url': this_url}
-
-        try:
-            response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies, timeout=timeout)
-        except requests.RequestException as e:
-            return dict(error=e.message)
-
-        return _return_response_and_status_code(response)
-
     def get_url_report(self, this_url, scan='0', allinfo=1, timeout=None):
         """ Get the scan results for a URL.
 
@@ -817,33 +796,6 @@ class PrivateApi(PublicApi):
 
         try:
             response = requests.get(self.base + 'domain/report', params=params, proxies=self.proxies, timeout=timeout)
-        except requests.RequestException as e:
-            return dict(error=e.message)
-
-        return _return_response_and_status_code(response)
-
-    def put_comments(self, resource, comment, timeout=None):
-        """ Post a comment on a file or URL.
-
-        Allows you to place comments on URLs and files, these comments will be publicly visible in VirusTotal
-        Community, under the corresponding tab in the reports for each particular item.
-
-        Comments can range from URLs and locations where a given file was found in the wild to full reverse
-        engineering reports on a given malware specimen, anything that may help other analysts in extending their
-        knowledge about a particular file or URL.
-
-        :param resource: Either an md5/sha1/sha256 hash of the file you want to review or the URL itself that you want
-        to comment on.
-        :param comment: The actual review, you can tag it using the "#" twitter-like syntax (e.g. #disinfection #zbot)
-        and reference users using the "@" syntax (e.g. @VirusTotalTeam).
-        :param timeout: The amount of time in seconds the request should wait before timing out.
-
-        :return: JSON response
-        """
-        params = {'apikey': self.api_key, 'resource': resource, 'comment': comment}
-
-        try:
-            response = requests.post(self.base + 'comments/put', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 

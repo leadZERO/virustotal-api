@@ -3,7 +3,14 @@
 Release History
 ---------------
 
-1.1.3 (2017-02-3)
+1.1.4 (2017-03-11)
+------------------
+
+**Fixed timeout functionality, removed unnecessary methods**
+
+- Fixed the timeout parameter in the PublicApi and removes unnecessary code in the PrivateApi (credit: @mrredamber aka LEGEND)
+
+1.1.3 (2017-02-03)
 ------------------
 
 **Request Timeout Functionality**
