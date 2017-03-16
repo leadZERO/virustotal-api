@@ -142,6 +142,10 @@ class PublicApi():
     def scan_url(self, this_url, timeout=None):
         """ Submit a URL to be scanned by VirusTotal.
 
+        Allows you to submit URLs to be scanned by VirusTotal. Before performing your submission we encourage you to
+        retrieve the latest report on the URL, if it is recent enough you might want to save time and bandwidth by
+        making use of it.
+        
         :param this_url: The URL that should be scanned. This parameter accepts a list of URLs (up to 4 with the
                          standard request rate) so as to perform a batch scanning request with one single call. The
                          URLs must be separated by a new line character.
