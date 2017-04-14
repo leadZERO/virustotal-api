@@ -3,6 +3,13 @@
 Release History
 ---------------
 
+1.1.5 (2017-04-13)
+------------------
+
+**API Changes**
+
+- Added Intelligence notifications feed and ability to programmatically delete notifications from the feed. (credit: @keithjjones)
+
 1.1.4 (2017-03-11)
 ------------------
 

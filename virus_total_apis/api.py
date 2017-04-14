@@ -87,11 +87,8 @@ class PublicApi():
                 files = {'file': this_file}
 
         try:
-            response = requests.post(self.base + 'file/scan',
-                                     files=files,
-                                     params=params,
-                                     proxies=self.proxies,
-                                     timeout=timeout)
+            response = requests.post(
+                self.base + 'file/scan', files=files, params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -145,7 +142,7 @@ class PublicApi():
         Allows you to submit URLs to be scanned by VirusTotal. Before performing your submission we encourage you to
         retrieve the latest report on the URL, if it is recent enough you might want to save time and bandwidth by
         making use of it.
-        
+
         :param this_url: The URL that should be scanned. This parameter accepts a list of URLs (up to 4 with the
                          standard request rate) so as to perform a batch scanning request with one single call. The
                          URLs must be separated by a new line character.
@@ -292,11 +289,8 @@ class PrivateApi(PublicApi):
                 files = {'file': this_file}
 
         try:
-            response = requests.post(self.base + 'file/scan',
-                                     files=files,
-                                     params=params,
-                                     proxies=self.proxies,
-                                     timeout=timeout)
+            response = requests.post(
+                self.base + 'file/scan', files=files, params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -320,13 +314,12 @@ class PrivateApi(PublicApi):
                                     params=params,
                                     proxies=self.proxies,
                                     timeout=timeout)
+            if response.status_code == requests.codes.ok:
+                return response.json().get('upload_url')
+            else:
+                return dict(response_code=response.status_code)
         except requests.RequestException as e:
             return dict(error=e.message)
-
-        if response.status_code == requests.codes.ok:
-            return response.json()['upload_url']
-        else:
-            return dict(response_code=response.status_code)
 
     def rescan_file(self, resource, date='', period='', repeat='', notify_url='', notify_changes_only='', timeout=None):
         """ Rescan a previously submitted filed or schedule an scan to be performed in the future.
@@ -605,9 +598,8 @@ class PrivateApi(PublicApi):
         """
         if package is None:
             now = datetime.utcnow()
-            five_minutes_ago = now - timedelta(minutes=now.minute % 5 + 5,
-                                               seconds=now.second,
-                                               microseconds=now.microsecond)
+            five_minutes_ago = now - timedelta(
+                minutes=now.minute % 5 + 5, seconds=now.second, microseconds=now.microsecond)
             package = five_minutes_ago.strftime('%Y%m%dT%H%M')
 
         params = {'apikey': self.api_key, 'package': package}
@@ -620,11 +612,13 @@ class PrivateApi(PublicApi):
         if response.ok:
             return response.content
         elif response.status_code == 400:
-            return dict(error='package sent is either malformed or not within the past 24 hours.',
-                        response_code=response.status_code)
+            return dict(
+                error='package sent is either malformed or not within the past 24 hours.',
+                response_code=response.status_code)
         elif response.status_code == 403:
-            return dict(error='You tried to perform calls to functions for which you require a Private API key.',
-                        response_code=response.status_code)
+            return dict(
+                error='You tried to perform calls to functions for which you require a Private API key.',
+                response_code=response.status_code)
         elif response.status_code == 404:
             return dict(error='File not found.', response_code=response.status_code)
         else:
@@ -651,8 +645,9 @@ class PrivateApi(PublicApi):
         if response.status_code == requests.codes.ok:
             return response.content
         elif response.status_code == 403:
-            return dict(error='You tried to perform calls to functions for which you require a Private API key.',
-                        response_code=response.status_code)
+            return dict(
+                error='You tried to perform calls to functions for which you require a Private API key.',
+                response_code=response.status_code)
         elif response.status_code == 404:
             return dict(error='File not found.', response_code=response.status_code)
         else:
@@ -736,9 +731,8 @@ class PrivateApi(PublicApi):
         """
         if package is None:
             now = datetime.utcnow()
-            five_minutes_ago = now - timedelta(minutes=now.minute % 5 + 5,
-                                               seconds=now.second,
-                                               microseconds=now.microsecond)
+            five_minutes_ago = now - timedelta(
+                minutes=now.minute % 5 + 5, seconds=now.second, microseconds=now.microsecond)
             package = five_minutes_ago.strftime('%Y%m%dT%H%M')
 
         params = {'apikey': self.api_key, 'package': package}
@@ -751,11 +745,13 @@ class PrivateApi(PublicApi):
         if response.ok:
             return response.content
         elif response.status_code == 400:
-            return dict(error='package sent is either malformed or not within the past 24 hours.',
-                        response_code=response.status_code)
+            return dict(
+                error='package sent is either malformed or not within the past 24 hours.',
+                response_code=response.status_code)
         elif response.status_code == 403:
-            return dict(error='You tried to perform calls to functions for which you require a Private API key.',
-                        response_code=response.status_code)
+            return dict(
+                error='You tried to perform calls to functions for which you require a Private API key.',
+                response_code=response.status_code)
         elif response.status_code == 404:
             return dict(error='File not found.', response_code=response.status_code)
         else:
@@ -863,10 +859,9 @@ class IntelApi():
                                     params=params,
                                     proxies=self.proxies,
                                     timeout=timeout)
+            return response.json().get('next_page'), response
         except requests.RequestException as e:
             return dict(error=e.message)
-
-        return response.json()['next_page'], response
 
     def get_file(self, file_hash, save_file_at, timeout=None):
         """ Get the scan results for a file.
@@ -895,8 +890,9 @@ class IntelApi():
             self.save_downloaded_file(file_hash, save_file_at, response.content)
             return response.content
         elif response.status_code == 403:
-            return dict(error='You tried to perform calls to functions for which you require a Private API key.',
-                        response_code=response.status_code)
+            return dict(
+                error='You tried to perform calls to functions for which you require a Private API key.',
+                response_code=response.status_code)
         elif response.status_code == 404:
             return dict(error='File not found.', response_code=response.status_code)
         else:
@@ -918,7 +914,7 @@ class IntelApi():
 
     def get_intel_notifications_feed(self, page=None, timeout=None):
         """ Get notification feed in JSON for further processing.
-        
+
         :param page: the next_page property of the results of a previously issued query to this API. This parameter
             should not be provided if it is the very first query to the API, i.e. if we are retrieving the
             first page of results.
@@ -931,14 +927,13 @@ class IntelApi():
                                     params=params,
                                     proxies=self.proxies,
                                     timeout=timeout)
+            return response.json().get('next'), response
         except requests.RequestException as e:
             return dict(error=e.message)
 
-        return response.json()['next'], response
-
     def delete_intel_notifications(self, ids, timeout=None):
         """ Programmatically delete notifications via the Intel API.
-        
+
         :param ids: A list of IDs to delete from the notification feed.
         :returns: The post response.
         """
@@ -948,11 +943,11 @@ class IntelApi():
         params = {'apikey': self.api_key, 'id': ids}
 
         try:
-            response = requests.post(self.base +
-                                     'hunting/delete-notifications/programmatic/',
-                                     params=params,
-                                     proxies=self.proxies,
-                                     timeout=timeout)
+            response = requests.post(
+                self.base + 'hunting/delete-notifications/programmatic/',
+                params=params,
+                proxies=self.proxies,
+                timeout=timeout)
         except requests.RequestException as e:
             return dict(error=e.message)
 
@@ -986,10 +981,12 @@ def _return_response_and_status_code(response):
     if response.status_code == requests.codes.ok:
         return dict(results=response.json(), response_code=response.status_code)
     elif response.status_code == 204:
-        return dict(error='You exceeded the public API request rate limit (4 requests of any nature per minute)',
-                    response_code=response.status_code)
+        return dict(
+            error='You exceeded the public API request rate limit (4 requests of any nature per minute)',
+            response_code=response.status_code)
     elif response.status_code == 403:
-        return dict(error='You tried to perform calls to functions for which you require a Private API key.',
-                    response_code=response.status_code)
+        return dict(
+            error='You tried to perform calls to functions for which you require a Private API key.',
+            response_code=response.status_code)
     else:
         return dict(response_code=response.status_code)
