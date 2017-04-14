@@ -916,6 +916,48 @@ class IntelApi():
             responses.append(_return_response_and_status_code(response))
         return dict(results=responses)
 
+    def get_intel_notifications_feed(self, page=None, timeout=None):
+        """ Get notification feed in JSON for further processing.
+        
+        :param page: the next_page property of the results of a previously issued query to this API. This parameter
+            should not be provided if it is the very first query to the API, i.e. if we are retrieving the
+            first page of results.
+        :param timeout: The amount of time in seconds the request should wait before timing out.
+        :returns: The next page identifier, The results (JSON is possible with .json())
+        """
+        params = {'apikey': self.api_key, 'page': page}
+        try:
+            response = requests.get(self.base + 'hunting/notifications-feed/',
+                                    params=params,
+                                    proxies=self.proxies,
+                                    timeout=timeout)
+        except requests.RequestException as e:
+            return dict(error=e.message)
+
+        return response.json()['next'], response
+
+    def delete_intel_notifications(self, ids, timeout=None):
+        """ Programmatically delete notifications via the Intel API.
+        
+        :param ids: A list of IDs to delete from the notification feed.
+        :returns: The post response.
+        """
+        if not isinstance(ids, list):
+            raise TypeError("ids must be a list")
+
+        params = {'apikey': self.api_key, 'id': ids}
+
+        try:
+            response = requests.post(self.base +
+                                     'hunting/delete-notifications/programmatic/',
+                                     params=params,
+                                     proxies=self.proxies,
+                                     timeout=timeout)
+        except requests.RequestException as e:
+            return dict(error=e.message)
+
+        return response
+
     @staticmethod
     def save_downloaded_file(filename, save_file_at, file_stream):
         """ Save Downloaded File to Disk Helper Function
