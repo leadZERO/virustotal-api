@@ -33,7 +33,7 @@ Installation
 Usage
 -----
 .. code-block:: python
-
+    from __future__ import print_function
     import json
     import hashlib
     from virus_total_apis import PublicApi as VirusTotalPublicApi
@@ -45,8 +45,8 @@ Usage
 
     vt = VirusTotalPublicApi(API_KEY)
 
-    response =  vt.get_file_report(EICAR_MD5)
-    print json.dumps(response, sort_keys=False, indent=4)
+    response = vt.get_file_report(EICAR_MD5)
+    print(json.dumps(response, sort_keys=False, indent=4))
 
 
 Output:
@@ -139,4 +139,4 @@ Please update the `HISTORY.rst <https://github.com/blacktop/virustotal-api/blob/
 License
 -------
 
-MIT Copyright (c) 2014-2017 **blacktop**  
+MIT Copyright (c) 2014-2017 **blacktop**
