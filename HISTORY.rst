@@ -3,6 +3,13 @@
 Release History
 ---------------
 
+1.1.6 (2017-05-14)
+------------------
+
+**Py3 Fix**
+
+- Change `e.message` to `str(message)` (credit: [@DeanF](https://github.com/blacktop/virustotal-api/pull/19))
+
 1.1.5 (2017-04-13)
 ------------------
 
