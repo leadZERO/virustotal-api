@@ -90,7 +90,7 @@ class PublicApi():
             response = requests.post(
                 self.base + 'file/scan', files=files, params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -109,7 +109,7 @@ class PublicApi():
         try:
             response = requests.post(self.base + 'file/rescan', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -132,7 +132,7 @@ class PublicApi():
         try:
             response = requests.get(self.base + 'file/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -155,7 +155,7 @@ class PublicApi():
         try:
             response = requests.post(self.base + 'url/scan', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -180,7 +180,7 @@ class PublicApi():
         try:
             response = requests.get(self.base + 'url/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -207,7 +207,7 @@ class PublicApi():
         try:
             response = requests.post(self.base + 'comments/put', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -228,7 +228,7 @@ class PublicApi():
                                     proxies=self.proxies,
                                     timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -245,7 +245,7 @@ class PublicApi():
         try:
             response = requests.get(self.base + 'domain/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -292,7 +292,7 @@ class PrivateApi(PublicApi):
             response = requests.post(
                 self.base + 'file/scan', files=files, params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -319,7 +319,7 @@ class PrivateApi(PublicApi):
             else:
                 return dict(response_code=response.status_code)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
     def rescan_file(self, resource, date='', period='', repeat='', notify_url='', notify_changes_only='', timeout=None):
         """ Rescan a previously submitted filed or schedule an scan to be performed in the future.
@@ -352,7 +352,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.post(self.base + 'file/rescan', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -374,7 +374,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.post(self.base + 'rescan/delete', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -403,7 +403,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'file/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -429,7 +429,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'file/behaviour', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -458,7 +458,7 @@ class PrivateApi(PublicApi):
                                     proxies=self.proxies,
                                     timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         try:
             return _return_response_and_status_code(response)
@@ -503,7 +503,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'file/search', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -544,7 +544,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'file/clusters', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -572,7 +572,7 @@ class PrivateApi(PublicApi):
                                     proxies=self.proxies,
                                     timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -607,7 +607,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'file/feed', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         if response.ok:
             return response.content
@@ -640,7 +640,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'file/download', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         if response.status_code == requests.codes.ok:
             return response.content
@@ -677,7 +677,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'url/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -705,7 +705,7 @@ class PrivateApi(PublicApi):
                                     proxies=self.proxies,
                                     timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -740,7 +740,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'url/feed', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         if response.ok:
             return response.content
@@ -777,7 +777,7 @@ class PrivateApi(PublicApi):
                                     proxies=self.proxies,
                                     timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -797,7 +797,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'domain/report', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -821,7 +821,7 @@ class PrivateApi(PublicApi):
         try:
             response = requests.get(self.base + 'comments/get', params=params, proxies=self.proxies, timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return _return_response_and_status_code(response)
 
@@ -861,7 +861,7 @@ class IntelApi():
                                     timeout=timeout)
             return response.json().get('next_page'), response
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
     def get_file(self, file_hash, save_file_at, timeout=None):
         """ Get the scan results for a file.
@@ -884,7 +884,7 @@ class IntelApi():
                                     stream=True,
                                     timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         if response.status_code == requests.codes.ok:
             self.save_downloaded_file(file_hash, save_file_at, response.content)
@@ -929,7 +929,7 @@ class IntelApi():
                                     timeout=timeout)
             return response.json().get('next'), response
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
     def delete_intel_notifications(self, ids, timeout=None):
         """ Programmatically delete notifications via the Intel API.
@@ -949,7 +949,7 @@ class IntelApi():
                 proxies=self.proxies,
                 timeout=timeout)
         except requests.RequestException as e:
-            return dict(error=e.message)
+            return dict(error=str(e))
 
         return response
 
