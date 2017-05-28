@@ -21,6 +21,7 @@ print json.dumps(response, sort_keys=False, indent=4)
 """
 
 import os
+import json
 from datetime import datetime, timedelta
 
 try:
@@ -921,7 +922,7 @@ class IntelApi():
         :param timeout: The amount of time in seconds the request should wait before timing out.
         :returns: The next page identifier, The results (JSON is possible with .json())
         """
-        params = {'apikey': self.api_key, 'page': page}
+        params = {'apikey': self.api_key, 'next': page}
         try:
             response = requests.get(self.base + 'hunting/notifications-feed/',
                                     params=params,
@@ -940,12 +941,13 @@ class IntelApi():
         if not isinstance(ids, list):
             raise TypeError("ids must be a list")
 
-        params = {'apikey': self.api_key, 'id': ids}
+        # VirusTotal needs ids as a stringified array
+        data = json.dumps(ids)
 
         try:
             response = requests.post(
-                self.base + 'hunting/delete-notifications/programmatic/',
-                params=params,
+                self.base + 'hunting/delete-notifications/programmatic/?key=' + self.api_key,
+                data=data,
                 proxies=self.proxies,
                 timeout=timeout)
         except requests.RequestException as e:
