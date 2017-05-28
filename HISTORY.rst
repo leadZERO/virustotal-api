@@ -3,6 +3,13 @@
 Release History
 ---------------
 
+1.1.7 (2017-05-28)
+------------------
+
+**Intel API Fix**
+
+- https://github.com/blacktop/virustotal-api/pull/18 (credit: @doug-the-guy)
+
 1.1.6 (2017-05-14)
 ------------------
 
