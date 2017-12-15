@@ -928,6 +928,8 @@ class IntelApi():
                                     params=params,
                                     proxies=self.proxies,
                                     timeout=timeout)
+            if len(response.content) == 0:
+                return None, response
             return response.json().get('next'), response
         except requests.RequestException as e:
             return dict(error=str(e))
