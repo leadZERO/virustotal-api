@@ -860,9 +860,10 @@ class IntelApi():
                                     params=params,
                                     proxies=self.proxies,
                                     timeout=timeout)
-            return response.json().get('next_page'), response
         except requests.RequestException as e:
             return dict(error=str(e))
+
+        return _return_response_and_status_code(response)
 
     def get_file(self, file_hash, save_file_at, timeout=None):
         """ Get the scan results for a file.
@@ -889,15 +890,8 @@ class IntelApi():
 
         if response.status_code == requests.codes.ok:
             self.save_downloaded_file(file_hash, save_file_at, response.content)
-            return response.content
-        elif response.status_code == 403:
-            return dict(
-                error='You tried to perform calls to functions for which you require a Private API key.',
-                response_code=response.status_code)
-        elif response.status_code == 404:
-            return dict(error='File not found.', response_code=response.status_code)
-        else:
-            return dict(response_code=response.status_code)
+
+        return _return_response_and_status_code(response, json_results=False)
 
     def get_all_file_report_pages(self, query):
         """ Get File Report (All Pages).
@@ -967,7 +961,7 @@ class IntelApi():
         except requests.RequestException as e:
             return dict(error=str(e))
 
-        return response
+        return _return_response_and_status_code(response)
 
     @staticmethod
     def save_downloaded_file(filename, save_file_at, file_stream):
@@ -987,15 +981,16 @@ class ApiError(Exception):
     pass
 
 
-def _return_response_and_status_code(response):
-    """ Output the requests response JSON and status code
+def _return_response_and_status_code(response, json_results=True):
+    """ Output the requests response content or content as json and status code
 
     :rtype : dict
     :param response: requests response object
-    :return: dict containing the JSON response and/or the status code with error string.
+    :param json_results: Should return JSON or raw content
+    :return: dict containing the response content and/or the status code with error string.
     """
     if response.status_code == requests.codes.ok:
-        return dict(results=response.json(), response_code=response.status_code)
+        return dict(results=response.json() if json_results else response.content, response_code=response.status_code)
     elif response.status_code == 204:
         return dict(
             error='You exceeded the public API request rate limit (4 requests of any nature per minute)',
