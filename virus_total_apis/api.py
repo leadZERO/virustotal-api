@@ -610,20 +610,7 @@ class PrivateApi(PublicApi):
         except requests.RequestException as e:
             return dict(error=str(e))
 
-        if response.ok:
-            return response.content
-        elif response.status_code == 400:
-            return dict(
-                error='package sent is either malformed or not within the past 24 hours.',
-                response_code=response.status_code)
-        elif response.status_code == 403:
-            return dict(
-                error='You tried to perform calls to functions for which you require a Private API key.',
-                response_code=response.status_code)
-        elif response.status_code == 404:
-            return dict(error='File not found.', response_code=response.status_code)
-        else:
-            return dict(response_code=response.status_code)
+        return _return_response_and_status_code(response, json_results=False)
 
     def get_file(self, this_hash, timeout=None):
         """ Download a file by its hash.
@@ -643,16 +630,7 @@ class PrivateApi(PublicApi):
         except requests.RequestException as e:
             return dict(error=str(e))
 
-        if response.status_code == requests.codes.ok:
-            return response.content
-        elif response.status_code == 403:
-            return dict(
-                error='You tried to perform calls to functions for which you require a Private API key.',
-                response_code=response.status_code)
-        elif response.status_code == 404:
-            return dict(error='File not found.', response_code=response.status_code)
-        else:
-            return dict(response_code=response.status_code)
+        return _return_response_and_status_code(response, json_results=False)
 
     def get_url_report(self, this_url, scan='0', allinfo=1, timeout=None):
         """ Get the scan results for a URL.
@@ -743,20 +721,7 @@ class PrivateApi(PublicApi):
         except requests.RequestException as e:
             return dict(error=str(e))
 
-        if response.ok:
-            return response.content
-        elif response.status_code == 400:
-            return dict(
-                error='package sent is either malformed or not within the past 24 hours.',
-                response_code=response.status_code)
-        elif response.status_code == 403:
-            return dict(
-                error='You tried to perform calls to functions for which you require a Private API key.',
-                response_code=response.status_code)
-        elif response.status_code == 404:
-            return dict(error='File not found.', response_code=response.status_code)
-        else:
-            return dict(response_code=response.status_code)
+        return _return_response_and_status_code(response, json_results=False)
 
     def get_ip_report(self, this_ip, timeout=None):
         """ Get information about a given IP address.
@@ -900,11 +865,23 @@ class IntelApi():
         :return: All JSON responses appended together.
         """
         responses = []
-        next_page, response = self.get_hashes_from_search(self, query)
-        responses.append(_return_response_and_status_code(response))
+        r = self.get_hashes_from_search(query)
+        responses.append(r)
+
+        if ('results' in r.keys()) and ('next_page' in r['results'].keys()):
+            next_page = r['results']['next_page']
+        else:
+            next_page = None
+
         while next_page:
-            next_page, response = self.get_hashes_from_search(query, next_page)
-            responses.append(_return_response_and_status_code(response))
+            r = self.get_hashes_from_search(query, next_page)
+
+            if ('results' in r.keys()) and ('next_page' in r['results'].keys()):
+                next_page = r['results']['next_page']
+            else:
+                next_page = None
+
+            responses.append(r)
         return dict(results=responses)
 
     def get_intel_notifications_feed(self, page=None, timeout=None):
@@ -928,7 +905,8 @@ class IntelApi():
                 class FakeResponse:
                     def __init__(self):
                         self.status_code = response.status_code
-                        self.content = '{"notifications":[],"verbose_msg":"No pending notification","result":0,"next":null}'
+                        self.content = \
+                            '{"notifications":[],"verbose_msg":"No pending notification","result":0,"next":null}'
 
                     def json(self):
                         import json as js
@@ -991,6 +969,10 @@ def _return_response_and_status_code(response, json_results=True):
     """
     if response.status_code == requests.codes.ok:
         return dict(results=response.json() if json_results else response.content, response_code=response.status_code)
+    elif response.status_code == 400:
+        return dict(
+                error='package sent is either malformed or not within the past 24 hours.',
+                response_code=response.status_code)
     elif response.status_code == 204:
         return dict(
             error='You exceeded the public API request rate limit (4 requests of any nature per minute)',
@@ -999,5 +981,7 @@ def _return_response_and_status_code(response, json_results=True):
         return dict(
             error='You tried to perform calls to functions for which you require a Private API key.',
             response_code=response.status_code)
+    elif response.status_code == 404:
+        return dict(error='File not found.', response_code=response.status_code)
     else:
         return dict(response_code=response.status_code)
