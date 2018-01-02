@@ -901,18 +901,10 @@ class IntelApi():
                                     timeout=timeout)
             # VT returns an empty result, len(content)==0, and status OK if there are no pending notifications.
             # To keep the API consistent we generate an empty object instead.
+            # This might not be necessary with a later release of the VTI API. (bug has been submitted)
             if len(response.content) == 0:
-                class FakeResponse:
-                    def __init__(self):
-                        self.status_code = response.status_code
-                        self.content = \
-                            '{"notifications":[],"verbose_msg":"No pending notification","result":0,"next":null}'
-
-                    def json(self):
-                        import json as js
-                        return js.loads(self.content)
-
-                response = FakeResponse()
+                response.__dict__['_content'] = \
+                    b'{"notifications":[],"verbose_msg":"No pending notification","result":0,"next":null}'
         except requests.RequestException as e:
             return dict(error=str(e))
 
