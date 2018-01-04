@@ -928,9 +928,16 @@ class IntelApi():
                                     params=params,
                                     proxies=self.proxies,
                                     timeout=timeout)
-            return response.json().get('next'), response
+            # VT returns an empty result, len(content)==0, and status OK if there are no pending notifications.
+            # To keep the API consistent we generate an empty object instead.
+            # This might not be necessary with a later release of the VTI API. (bug has been submitted)
+            if len(response.content) == 0:
+                response.__dict__['_content'] = \
+                    b'{"notifications":[],"verbose_msg":"No pending notification","result":0,"next":null}'
         except requests.RequestException as e:
             return dict(error=str(e))
+
+        return _return_response_and_status_code(response)
 
     def delete_intel_notifications(self, ids, timeout=None):
         """ Programmatically delete notifications via the Intel API.
