@@ -23,9 +23,9 @@ chardet:
 	git clone https://github.com/chardet/chardet.git && rm -fr requests/packages/chardet &&	mv chardet/chardet requests/packages/ && rm -fr chardet
 
 publish:
-	python setup.py register
-	python setup.py sdist upload
-	python setup.py bdist_wheel --universal upload
+	python2 setup.py register
+	python2 setup.py sdist upload
+	python2 setup.py bdist_wheel --universal upload
 	rm -fr build dist .egg requests.egg-info
 
 docs-init:
